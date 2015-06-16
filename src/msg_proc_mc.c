@@ -18,6 +18,7 @@
 #include "yunba_push.h"
 #include "time.h"
 #include "log.h"
+#include "db.h"
 
 
 int mc_msg_send(void* msg, size_t len, CB_CTX* ctx)
@@ -94,6 +95,15 @@ int mc_login(const void* msg, CB_CTX* ctx)
 	{
 		//TODO: LOG_ERROR
 	}
+        
+        char tableName[IMEI_LENGTH * 2 + 5] = "tbl_";
+        strncat(tableName, get_IMEI_STRING(req->IMEI), IMEI_LENGTH * 2);
+
+        //check whether the table exists;
+        if (!db_isTableCreated(tableName))
+        {
+            //db_create();
+        }
 
 	return 0;
 }
@@ -135,6 +145,20 @@ int mc_gps(const void* msg, CB_CTX* ctx)
 	{
 		yeelink_createDevice(obj, ctx);
 	}
+    
+    //save GPS data to database
+    if (req->location & 0x01)
+    {
+        //save GPS
+        //TODO
+        //db_saveGPS();
+    }
+    else
+    {
+        //save CGI
+        //TODO
+        //db_saveCGI();
+    }
 
 	if(!(req->location&0x01) && obj->lon != 0)
 	{

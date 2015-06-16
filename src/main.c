@@ -11,6 +11,7 @@
 #include "yunba_push.h"
 #include "object_mc.h"
 #include "env.h"
+#include "db.h"
 
 struct event_base *base = NULL;
 
@@ -94,8 +95,20 @@ int main(int argc, char **argv)
     env_initial();
 
     mc_obj_initial();
+    
+    rc = db_initial();
+    if (rc)
+    {
+        LOG_FATAL("DB initial failed(rc = %d", rc);
+        mc_obj_destruct();
+        env_cleanup();
+        curl_global_cleanup();
+        yunba_disconnect();
+        mosquitto_lib_cleanup();        
+        return -1;
+    }
 
-	leancloud_getOBJ();
+    leancloud_getOBJ();
 
     struct evconnlistener* listener = server_mc_start(base, port);
     if (listener)
