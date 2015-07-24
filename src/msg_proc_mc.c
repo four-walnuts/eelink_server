@@ -96,14 +96,11 @@ int mc_login(const void* msg, CB_CTX* ctx)
 		//TODO: LOG_ERROR
 	}
         
-        char tableName[IMEI_LENGTH * 2 + 5] = "tbl_";
-        strncat(tableName, get_IMEI_STRING(req->IMEI), IMEI_LENGTH * 2);
-
-        //check whether the table exists;
-        if (!db_isTableCreated(tableName))
-        {
-            //db_create();
-        }
+    //check whether the gps_table and cgi_table exists;
+    if (!db_isTableCreated(get_IMEI_STRING(req->IMEI)))
+    {
+        db_create(get_IMEI_STRING(req->IMEI));
+    }
 
 	return 0;
 }
@@ -146,18 +143,17 @@ int mc_gps(const void* msg, CB_CTX* ctx)
 		yeelink_createDevice(obj, ctx);
 	}
     
-    //save GPS data to database
+    //save GPS or CGI data to database
     if (req->location & 0x01)
     {
-        //save GPS
-        //TODO
-        //db_saveGPS();
+        //int db_saveGPS(const char *name, int timestamp, int lat, int lon, char speed, short course)
+        db_saveGPS(get_IMEI_STRING(obj->IMEI), req->timestamp, req->lat, req->lon, req->speed, req->course);
+        
     }
     else
     {
-        //save CGI
-        //TODO
-        //db_saveCGI();
+        //int db_saveCGI(const char *name, int timestamp, short mcc, short mnc, short lac, char ci[])
+        db_saveCGI(get_IMEI_STRING(obj->IMEI), req->timestamp, req->cell.mcc, req->cell.mnc, req->cell.lac, req->cell.ci);
     }
 
 	if(!(req->location&0x01) && obj->lon != 0)

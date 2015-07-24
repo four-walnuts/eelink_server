@@ -14,14 +14,16 @@
 #define DB_PWD  "eelink"
 #define DB_PORT (3306)
 #define DB_NAME "gps"
+#define MAX_QUERY 120
 
 int db_initial();
 int db_destruct();
 
-int db_isTableCreated(char* tableName);
-int db_create(char* tableName);
-int db_saveGPS(int timestamp, int lat, int lng, char speed, short course);
-int db_saveCGI(int timestamp, short mcc, short mnc, short lac, int ci);
+int db_isTableCreated(const char* imeiName);
+int db_create(const char* imeiName);
+int db_saveGPS(const char* imeiName, int timestamp, int lat, int lon, char speed, short course);
+int db_saveCGI(const char* imeiName, int timestamp, short mcc, short mnc, short lac, char ci[]);
+
 
 #endif	/* DB_H */
 
