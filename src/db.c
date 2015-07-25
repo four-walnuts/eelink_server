@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include "db.h"
 #include "msg_mc.h"
+#include "log.h"
 
 int db_initial()
 {
