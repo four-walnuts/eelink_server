@@ -12,7 +12,7 @@
 
 #include "db.h"
 #include "log.h"
-#include "macro.h"
+#include "macro_mc.h"
 
 static MYSQL *conn;
 
