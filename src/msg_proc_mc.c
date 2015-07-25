@@ -99,7 +99,14 @@ int mc_login(const void* msg, CB_CTX* ctx)
     //check whether the gps_table and cgi_table exists;
     if (!db_isTableCreated(get_IMEI_STRING(req->IMEI)))
     {
-        db_create(get_IMEI_STRING(req->IMEI));
+        char tableName[IMEI_LENGTH * 2 +5] = "gps_";
+        strncat(tableName, get_IMEI_STRING(req->IMEI), IMEI_LENGTH * 2);
+        db_createGPS(tableName);
+
+        strcpy(tableName, "cgi_");
+        strncat(tableName, get_IMEI_STRING(req->IMEI), IMEI_LENGTH * 2);
+        db_createCGI(tableName);
+
     }
 
 	return 0;

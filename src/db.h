@@ -20,10 +20,10 @@ int db_initial();
 int db_destruct();
 
 int db_isTableCreated(const char* imeiName);
-int db_create(const char* imeiName);
+int db_createGPS(const char* tableName);
+int db_createCGI(const char* tableName);
 int db_saveGPS(const char* imeiName, int timestamp, int lat, int lon, char speed, short course);
 int db_saveCGI(const char* imeiName, int timestamp, short mcc, short mnc, short lac, char ci[]);
-
 
 #endif	/* DB_H */
 
