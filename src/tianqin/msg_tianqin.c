@@ -6,6 +6,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "msg_tianqin.h"
 #include "macro.h"
@@ -20,12 +21,12 @@ char *get_EI_STRING(const char *ei)
 	}
 	for(int i = 0; i < (EI_LENGTH / 2); i++)
 	{
-		sprintf(ret + i * 2; "%02x", ei[i]);
+		sprintf(ret + i * 2, "%02x", ei[i]);
 	}
 	
 	for(int i = EI_LENGTH; i < IMEI_LENGTH; ++i)
 	{
-		ret[i] = '0' + i - EI_LENGTH;
+		ret[i] = '0';
 	}
 	ret[IMEI_LENGTH] = 0;
 

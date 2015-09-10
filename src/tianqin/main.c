@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     obj_table_initial(mqtt_subscribe);
     session_table_initial();
 
-    struct evconnlistener* listener = server_start(base, port);
+    struct evconnlistener* listener = server_tianqin(base, port);
     if (listener)
     {
         LOG_INFO("start mc server successfully at port:%d", port);

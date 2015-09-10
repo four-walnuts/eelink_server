@@ -22,6 +22,7 @@
 
 static void app_sendRawData2TK115(const void* msg, int len, const char* imei, int token)
 {
+/*
 	SESSION *session = session_get(imei);
 	if(!session)
 	{
@@ -41,6 +42,7 @@ static void app_sendRawData2TK115(const void* msg, int len, const char* imei, in
 	{
 		LOG_FATAL("insufficient memory");
 	}
+	*/
 }
 
 static void app_sendRawData2App(const char* topic, char *data, int len, void* session)

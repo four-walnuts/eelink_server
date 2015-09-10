@@ -10,19 +10,22 @@
 #include <netinet/in.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "msg_proc_app.h"
 #include "msg_proc_tianqin.h"
 #include "log.h"
 #include "session.h"
 #include "object.h"
-
-#include "protocol.h"
+#include "mqtt.h"
 #include "msg_tianqin.h"
+#include "db.h"
 
-static int tianqin_login(const void* msg, SESSION* session);
-static int tianqin_gps(const void* msg, SESSION* session);
-static int tianqin_alarm(const void* msg, SESSION* session);
+static int tianqin_login(const MSG_V1 *msg, SESSION *session);
+static int tianqin_gps(const MSG_V1 *msg, SESSION *session);
+static int tianqin_alarm(const MSG_V1 *msg, SESSION *session);
+static int tianqin_isAlarm(const MSG_V1 *msg);
+static int tianqin_isGPS(const MSG_V1 *msg);
 
 int handle_tianqin_msg(const char* m, size_t msgLen, void* arg)
 {
@@ -41,19 +44,20 @@ int handle_tianqin_msg(const char* m, size_t msgLen, void* arg)
         return -1;
     }
 
-    if()    //TODO: is alarm
+    if(!tianqin_isAlarm(msg))    //TODO: is alarm
     {
-        tianqin_alarm(msg, arg);
+        tianqin_gps(msg, arg);
     }
     else
     {
-        tianqin_gps(msg, arg);
+        tianqin_alarm(msg, arg);
     }
 }
 
 
 static int simcom_msg_send(void* msg, size_t len, SESSION* session)
 {
+    /*
     if (!session)
     {
         return -1;
@@ -74,12 +78,13 @@ static int simcom_msg_send(void* msg, size_t len, SESSION* session)
     free(msg);
 
     return 0;
+    */
 }
 
-static int tianqin_login(const void* msg, SESSION* session)
+static int tianqin_login(const MSG_V1 *msg, SESSION* session)
 {
     const MSG_V1* req = msg;
-    const char *ei = get_EI_STRING(req->EI);
+    const char *ei = get_EI_STRING(msg->EI);
 
     LOG_DEBUG("tianqin EI(%s) login", ei);
 
@@ -93,7 +98,7 @@ static int tianqin_login(const void* msg, SESSION* session)
         memcpy(obj->DID, ei, IMEI_LENGTH);
 
         obj_add(obj);
-        mqtt_subscibe(obj->IMEI);
+        mqtt_subscribe(obj->IMEI);
     }
     session->obj = obj;
     session_add(session);
@@ -129,18 +134,16 @@ static int get_lon(const char *lon)
     return ret;
 }
 
-static int simcom_gps(const void* msg, SESSION* session)
+static int tianqin_gps(const MSG_V1* msg, SESSION* session)
 {
-    const MSG_V1* req = msg;
-
-    const char *ei = get_EI_STRING(req->EI);    //TODO: strdump
+    const char *ei = get_EI_STRING(msg->EI);    //TODO: strdump
     if(session_get(ei) == NULL)
     {
         tianqin_login(msg, session);
     }
 
-    int lat = get_lat(req->lat);
-    int lon = get_lon(req->lon);
+    int lat = get_lat(msg->lat);
+    int lon = get_lon(msg->lon);
     static const int transGPS = 1800000;
 
     LOG_INFO("GPS: lat(%f), lng(%f)", (double)lat/transGPS, (double)lon/transGPS);
@@ -174,7 +177,7 @@ static int simcom_gps(const void* msg, SESSION* session)
 
     //yeelink_saveGPS(obj, session);
 
-    if () //TODO: wuxiao
+    if (tianqin_isGPS(msg)) //TODO: wuxiao
     {
         //int db_saveGPS(const char *name, int timestamp, int lat, int lon, char speed, short course)
         db_saveGPS(obj->IMEI, obj->timestamp, obj->lat, obj->lon, obj->speed, obj->course);
@@ -183,7 +186,19 @@ static int simcom_gps(const void* msg, SESSION* session)
     return 0;
 }
 
-static int simcom_alarm(const void* msg, SESSION* session)
+static int tianqin_alarm(const MSG_V1 *msg, SESSION *session)
 {
     return 0;
+}
+
+static int tianqin_isAlarm(const MSG_V1 *msg)
+{
+    //TODO:
+    return 1;
+}
+
+static int tianqin_isGPS(const MSG_V1 *msg)
+{
+    //TODO:
+    return 1;
 }
