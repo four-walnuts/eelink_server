@@ -5,7 +5,6 @@
  *      Author: jk
  */
 
-
 #include <string.h>
 #include <netinet/in.h>
 #include <malloc.h>
@@ -21,28 +20,41 @@
 #include "msg_tianqin.h"
 #include "db.h"
 
+static int handle_one_msg(const char *m, void *arg);
 static int tianqin_login(const MSG_V1 *msg, SESSION *session);
 static int tianqin_gps(const MSG_V1 *msg, SESSION *session);
 static int tianqin_alarm(const MSG_V1 *msg, SESSION *session);
 static int tianqin_isAlarm(const MSG_V1 *msg);
 static int tianqin_isGPS(const MSG_V1 *msg);
 
-int handle_tianqin_msg(const char* m, size_t msgLen, void* arg)
+int handle_tianqin_msg(const char *m, size_t msgLen, void *arg)
 {
-    MSG_V1* msg = (MSG_V1*)m;
-
     if (msgLen < sizeof(MSG_V1))
     {
         LOG_ERROR("message length not enough: %zu(at least(%zu)", msgLen, sizeof(MSG_HEADER));
-
         return -1;
     }
 
-    if (msg->signature != START_FLAG)
+    const char *head = m;
+    size_t leftMsgLen = msgLen;
+    
+    while(leftMsgLen >= sizeof(MSG_V1))
     {
-        LOG_ERROR("message head signature error:%d", msg->signature);
-        return -1;
+        if( *head == START_FLAG )
+        {
+            LOG_ERROR("message head signature error:%d", *head);
+            return -1;
+        }
+        handle_one_msg(m, arg);
+        leftMsgLen -= sizeof(MSG_V1);
+        head += sizeof(MSG_V1);
     }
+    return 0;
+}
+
+static int handle_one_msg(const char* m, void* arg)
+{
+    MSG_V1* msg = (MSG_V1 *)m;
 
     if(!tianqin_isAlarm(msg))    //TODO: is alarm
     {
@@ -52,6 +64,7 @@ int handle_tianqin_msg(const char* m, size_t msgLen, void* arg)
     {
         tianqin_alarm(msg, arg);
     }
+    return 0;
 }
 
 
@@ -190,6 +203,7 @@ static int tianqin_alarm(const MSG_V1 *msg, SESSION *session)
 {
     return 0;
 }
+
 
 static int tianqin_isAlarm(const MSG_V1 *msg)
 {
